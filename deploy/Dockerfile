@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1.7
 
 # ==============================================================================
-# assignment-service - Spring Boot 4.1 / Java 25 / Maven (single module)
+# identity-service - Spring Boot 4.1 / Java 25 / Maven (single module)
 #
 # Build context expected from the repository root:
-#   docker build -f deploy/Dockerfile -t assignment-service .
+#   docker build -f deploy/Dockerfile -t identity-service .
 #
 # To run tests as part of the image build:
 #   docker build --build-arg SKIP_TESTS=false -f deploy/Dockerfile .
@@ -25,7 +25,7 @@ COPY --chmod=0755 mvnw ./mvnw
 COPY .mvn ./.mvn
 COPY pom.xml ./pom.xml
 
-RUN --mount=type=cache,id=assignment-service-maven,target=/root/.m2,sharing=locked \
+RUN --mount=type=cache,id=identity-service-maven,target=/root/.m2,sharing=locked \
     ./mvnw --batch-mode --no-transfer-progress -DskipTests dependency:go-offline
 
 # This repository is a single Maven module, so only its source tree is required.
@@ -34,13 +34,13 @@ COPY src ./src
 # Tests normally run in the CI quality stage. Set SKIP_TESTS=false when the
 # Docker build itself must execute them.
 ARG SKIP_TESTS=true
-RUN --mount=type=cache,id=assignment-service-maven,target=/root/.m2,sharing=locked \
+RUN --mount=type=cache,id=identity-service-maven,target=/root/.m2,sharing=locked \
     if [ "${SKIP_TESTS}" = "true" ]; then \
         ./mvnw --batch-mode --no-transfer-progress -Dmaven.test.skip=true package; \
     else \
         ./mvnw --batch-mode --no-transfer-progress verify; \
     fi \
-    && cp target/assignment-service-*.jar application.jar \
+    && cp target/identity-service-*.jar application.jar \
     && java -Djarmode=tools -jar application.jar extract \
         --layers \
         --launcher \
